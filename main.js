@@ -78,7 +78,7 @@ function childModel(actions, inputs) {
 function child(sources, inputs) {
   const actions = childIntent(sources)
   const state$ = childModel(actions, inputs)
-  actions.path$.addListener(noopListener)
+
   return {
     DOM: inputs.props$.map(props => state$.map(state => div(`.child`, [
       div([`${props.title}`]),
