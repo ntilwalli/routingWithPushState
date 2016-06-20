@@ -1,4 +1,5 @@
 import xs from 'xstream'
+import delay from 'xstream/extra/delay'
 import Cycle from '@cycle/xstream-run';
 import {div, label, button, input, hr, ul, li, a, makeDOMDriver} from '@cycle/dom';
 import {makeRouterDriver} from 'cyclic-router';
@@ -98,7 +99,7 @@ function child(sources, inputs) {
 function main(sources) {
 
   const routes = {
-    '/': (state$) => root(sources, {injectedState$: state$ || xs.of({count: 0})}),
+    '/': (state$) => root(sources, {injectedState$: state$}),
     '/page1': (state$) => {
       return child(sources, {props$: xs.of({title: `Page 1`}), injectedState$: state$})
     },
@@ -107,22 +108,25 @@ function main(sources) {
     }
   }
 
-  const component$ = sources.Router.define(routes)
-      .drop(1)
-      .map(route => {
-        return route.value(route.location.state)
-      })
-      .remember()
+  const defined$ = sources.Router.define(routes)
+  const component$ = xs.merge(
+    // On initial load make sure to clear out stale pushState...
+    defined$.take(1).map(route => {
+      route.location.state = xs.of({count: 0})
+      return route
+    }),
+    defined$.drop(1)
+  )
+  .map(route => {
+    return route.value(route.location.state)
+  })
+  .remember()
 
 	return {
 		DOM: component$
 			.map(x => x.DOM)
 			.flatten(),
-    Router: component$.map(x => x.Router).flatten().startWith({
-      action: `REPLACE`,
-      pathname: `/`,
-      state: xs.of({count: 0})
-    })
+    Router: component$.map(x => x.Router).flatten()
 	}
 }
 
