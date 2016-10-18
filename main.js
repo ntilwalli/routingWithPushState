@@ -1,10 +1,11 @@
 import xs from 'xstream'
 import delay from 'xstream/extra/delay'
-import Cycle from '@cycle/xstream-run';
-import {div, label, button, input, hr, ul, li, a, makeDOMDriver} from '@cycle/dom';
-import {makeRouterDriver} from 'cyclic-router';
-import {createHistory} from 'history';
+import Cycle from '@cycle/xstream-run'
+import {div, label, button, input, hr, ul, li, a, makeDOMDriver} from '@cycle/dom'
+import {makeRouterDriver} from 'cyclic-router'
+import {createHistory} from 'history'
 import Immutable from 'immutable'
+import switchPath from 'switch-path'
 
 export function noop() {}
 export const noopListener = {
@@ -132,7 +133,7 @@ function main(sources) {
 
 const drivers = {
 	DOM: makeDOMDriver('#app'),
-	Router: makeRouterDriver(createHistory()),
+	Router: makeRouterDriver(createHistory(), switchPath),
 };
 
 Cycle.run(main, drivers);
